@@ -1,0 +1,67 @@
+1. Todas as produções, juntamente com pesquisador
+	Justificativa: Auxilia a visualização das produções realizadas pelos pesquisadores dentro do sistema
+
+	==> SQL:
+		SELECT
+			p.*
+		FROM Producao p
+			INNER JOIN Curriculo c ON p.fk_Curriculo_id = c.id
+		WHERE
+			c.id = <qualquer_id>
+
+	==> Algebra Relacional:
+		Producao |><|                                       Curriculo
+		             Producao.fk_Curriculo_id = Curriculo.id
+	
+
+2. Quantidade de pesquisadores com determinada formacao academica
+	Justificativa: Mostra o id da formação academica, juntamente com a quantidade de vezes que ela é usada
+
+	==> SQL:
+		SELECT
+			f_a.id, COUNT(f_a.id)
+		FROM curriculo_formacao_academica c_f_a
+			INNER JOIN Formacao_Academica f_a ON c_f_a.fk_Formacao_Academica_id = f_a.id
+		GROUP BY
+			f_a.id
+
+	==> Algebra Relacional:
+		π                                                   (curriculo_formacao_academica |><|                                                                             Formacao_Academica)
+		 Formacao_Academica.id, count(Formacao_Academica.id)                                  curriculo_formacao_academica.fk_Formacao_Academica_id = Formacao_Academica.id
+
+
+3. Linhas de pesquisa, com pesquisador
+	Justificativa: Descobrir quais linhas de pesquisa sendo pesquisadas e quem está pesquisando
+
+	==> SQL:
+		SELECT 
+			c.*, l.*
+		FROM  curriculo_linha_pesquisa c_l_p
+			INNER JOIN Curriculo c ON c_l_p.fk_Curriculo_id = c.id
+			INNER JOIN LinhaPesquisa l ON c_l_p.fk_LinhaPesquisa_id = l.id
+
+	==> Algebra Relacional:
+		LinhaPesquisa |><|                                                               (curriculo_linha_pesquisa |><|                                                       Curriculo)
+		                  LinhaPesquisa.id = curriculo_linha_pesquisa.fk_LinhaPesquisa_id                              curriculo_linha_pesquisa.fk_Curriculo_id = Curriculo.id               
+
+4. Curriculo de todas as pessoas que falam ingles
+	Justificativa: Descobrir, de todos os profissionais e estudantes cadastrados 
+			na plataforma, os que falam inglês
+
+SELECT
+	c.*
+	FROM curriculo_idioma c_i
+		INNER JOIN curriculo c ON c_i.fk_Curriculo_id = c.id
+		INNER JOIN nive_lidioma nl ON c_i.fk_nive_lidioma_id = nl.id
+		INNER JOIN nivelidioma ni ON ni.fk_nive_lidioma_id = nl.id
+		INNER JOIN idioma i ON i.id = ni.fk_idioma_id
+	WHERE
+		i.nome = 'ingles'
+	
+
+	==> Algebra Relacional:
+		π 	     |><|						curriculo_idioma |><|							  nivelidioma |><|				                   nive_lidioma |><|					 SIGMA			  (idioma)
+		 curriculo.*	 curriculo.id = curriculo_idioma.fk_curriculo_id		     curriculo_idioma.fk_nive_lidioma_id = nivelidioma.id		   nivelidioma.id = nive_lidioma.fk_nivelidioma_id		    nive_lidioma.fk_idioma_id = idioma.id     idioma.nome = ingles 
+	
+
+
